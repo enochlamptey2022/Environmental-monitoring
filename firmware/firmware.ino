@@ -8,24 +8,24 @@
 #include <MQUnifiedsensor.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <BlynkSimpleEsp32.h>  // Include the Blynk library for ESP32
+#include <BlynkSimpleEsp32.h> // Include the Blynk library for ESP32
 
-#define BUZZER_PIN 18            // ESP32 pin GPIO18 connected to piezo buzzer
-#define TONE_FREQUENCY 1000      // Adjust this value to change the tone frequency
-#define TONE_DURATION 500        // Adjust this value to change the duration of each tone
-#define DELAY_BETWEEN_TONES 500  // Adjust this value to change the delay between tones
+#define BUZZER_PIN  18 // ESP32 pin GPIO18 connected to piezo buzzer
+#define TONE_FREQUENCY 1000 // Adjust this value to change the tone frequency
+#define TONE_DURATION 500 // Adjust this value to change the duration of each tone
+#define DELAY_BETWEEN_TONES 500 // Adjust this value to change the delay between tones
 
 // Blynk authentication token
 char auth[] = "C_VK0K3WDageK7vRDYXGqBmnJRkvvTTw";
 
 // Your WiFi credentials
 char ssid[] = "iPhone";
-char pass[] = "enoch1000";
+char pass[] = "enoch222";
 
 
 // MQ135 board specific macros
 #define Board ("ESP32")
-#define Pin (34)         // Analog input 3 of your arduino
+#define Pin (34)       // Analog input 3 of your arduino
 #define Type ("MQ-135")  // MQ135
 #define Voltage_Resolution (3.3)
 #define ADC_Bit_Resolution (12)  // For arduino UNO/MEGA/NANO
@@ -69,14 +69,14 @@ void setup() {
   display.clearDisplay();
   display.setTextColor(WHITE);
   display.setTextSize(1);
-  MQ135.setRegressionMethod(1);
+  MQ135.setRegressionMethod(1);  
   MQ135.setA(574.25);
-  MQ135.setB(-2.222);
+  MQ135.setB(-2.222);  
   MQ135.init();
   Serial.print("Calibrating please wait.");
   float calcR0 = 0;
   for (int i = 1; i <= 10; i++) {
-    MQ135.update();
+    MQ135.update();  
     calcR0 += MQ135.calibrate(RatioMQ2CleanAir);
     Serial.print(".");
   }
@@ -84,13 +84,11 @@ void setup() {
   Serial.println("  done!.");
   if (isinf(calcR0)) {
     Serial.println("Warning: Connection issue, R0 is infinite (Open circuit detected) please check your wiring and supply");
-    while (1)
-      ;
+    while (1);
   }
   if (calcR0 == 0) {
     Serial.println("Warning: Connection issue found, R0 is zero (Analog pin shorts to ground) please check your wiring and supply");
-    while (1)
-      ;
+    while (1);
   }
   MQ135.serialDebug(true);
 
@@ -101,14 +99,14 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("WiFi connected");
-
+  
   // Initialize Blynk
   Blynk.begin(auth, ssid, pass);
 }
 
 void loop() {
-  Blynk.run();  // Run Blynk
-
+  Blynk.run(); // Run Blynk
+  
   display.clearDisplay();
   for (int i = 63; i < 66; i++) {
     display.drawFastVLine(i, 0, 64, WHITE);
@@ -131,13 +129,7 @@ void loop() {
   sendSensorDataToBlynk();
 
   display.display();
-  delay(1000);
-  display.clearDisplay();
-  display.setCursor(25, 16);
-  display.print("Good Environment");
-  display.display();
   delay(2000);
-
 }
 
 void displayCO() {
@@ -152,9 +144,6 @@ void displayCO() {
   display.setTextSize(1);
   display.setCursor(68, 22);
   display.print("ppm");
-
-  Serial.print("Carbon Monoxide (CO):\t");
-  Serial.println(coValue);
 }
 
 void setPlaceholders(struct pms5003data data) {
@@ -203,16 +192,6 @@ void displayTemperature() {
   display.print("degrees");
   display.setCursor(68, 56);
   display.print("percent");
-
-  Serial.print("Humidity: ");
-  Serial.print(humi);
-  Serial.print("%");
-  Serial.print("  |  ");
-  Serial.print("Temperature: ");
-  Serial.print(tempC);
-  Serial.print("°C  ~  ");
-  Serial.print(tempF);
-  Serial.println("°F");
 }
 
 boolean readPMSdata(Stream *s) {
@@ -252,15 +231,15 @@ void readTemperature() {
   if (isnan(tempC) || isnan(tempF) || isnan(humi)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
-    // Serial.print("Humidity: ");
-    // Serial.print(humi);
-    // Serial.print("%");
-    // Serial.print("  |  ");
-    // Serial.print("Temperature: ");
-    // Serial.print(tempC);
-    // Serial.print("°C  ~  ");
-    // Serial.print(tempF);
-    // Serial.println("°F");
+    Serial.print("Humidity: ");
+    Serial.print(humi);
+    Serial.print("%");
+    Serial.print("  |  ");
+    Serial.print("Temperature: ");
+    Serial.print(tempC);
+    Serial.print("°C  ~  ");
+    Serial.print(tempF);
+    Serial.println("°F");
   }
 }
 
@@ -277,13 +256,13 @@ void sendSensorDataToBlynk() {
   readPMSdata(&Serial1);
 
   // Send sensor data to Blynk
-  Blynk.virtualWrite(V0, pm25);     // Send PM2.5 data to virtual pin V0
-  Blynk.virtualWrite(V1, tempC);    // Send temperature data to virtual pin V1
-  Blynk.virtualWrite(V2, humi);     // Send humidity data to virtual pin V2
-  Blynk.virtualWrite(V3, coValue);  // Send CO2 data to virtual pin V3
+  Blynk.virtualWrite(V0, pm25); // Send PM2.5 data to virtual pin V0
+  Blynk.virtualWrite(V1, tempC); // Send temperature data to virtual pin V1
+  Blynk.virtualWrite(V2, humi); // Send humidity data to virtual pin V2
+  Blynk.virtualWrite(V3, coValue); // Send CO2 data to virtual pin V3
 
   // Check if PM2.5 exceeds 30
   if (pm25 > 30) {
-    Blynk.logEvent("pollution_alert", "Bad air! Make sure you have your inhaler!!!!!");  // Log event to Blynk
+    Blynk.logEvent("pollution_alert", "Bad air! Make sure you have your inhaler!!!!!"); // Log event to Blynk
   }
 }
