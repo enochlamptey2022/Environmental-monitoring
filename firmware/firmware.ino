@@ -25,7 +25,7 @@ char pass[] = "enoch222";
 
 // MQ135 board specific macros
 #define Board ("ESP32")
-#define Pin (34)       // Analog input 3 of your arduino
+#define Pin (34)       // Analog input 3 of the MQ135 sensor 
 #define Type ("MQ-135")  // MQ135
 #define Voltage_Resolution (3.3)
 #define ADC_Bit_Resolution (12)  // For arduino UNO/MEGA/NANO
@@ -121,7 +121,7 @@ void loop() {
   displayPPM(data);
 
   // Sound the buzzer based on sensor readings
-  if (tempC > 35 || humi > 80 || pm25 > 69 || MQ135.readSensor() > 15) {
+  if ( pm25 > 12 || MQ135.readSensor() > 9) {
     soundBuzzer();
   }
 
